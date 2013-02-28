@@ -76,7 +76,7 @@ namespace MSIPClassLibrary
         string _toUser;
         string _myName;
         string _myIp;
-        int n = 0;       //хз что это за параметр, ну да ладно
+        int _cSeq = 0;       //
         int _port, _myaudioport, _toaudioport;
         bool _sessionConfirmed = false;
         string _sessionID;
@@ -93,11 +93,11 @@ namespace MSIPClassLibrary
             _myName = usParam.UserId;
             _myIp = CurrentIPAddress();
             _port = myPort;
-            
+            _cSeq = 0;
             _myaudioport = 11010;
             _sessionID = ID;
             DelClosesession = d1;
-            n++;
+            _cSeq++;
 
             if (SDPfunc.Length != 0)
             {
@@ -116,12 +116,43 @@ namespace MSIPClassLibrary
                 return _toUser;
             }
         }
+        public int CSeq
+        {
+            set { _cSeq = value; }
+            get { return _cSeq; }
+        }
+        public string MyName
+        {
+            get { return _myName; }
+        }
+        public string MyIP
+        {
+            get { return _myIp; }
+        }
+        public string ToUser
+        {
+            set { _toUser = value; }
+            get { return _toUser; }
+        }
+        public string ToIP
+        {
+            set { _toIP = value; }
+            get { return _toIP; }
+        }
+        public string SDPInfo
+        {
+            get { return _SDP; }
+        }
+        public string SessionID
+        {
+            get { return _sessionID; }
+        }
         /// <summary>
         /// Функция закрытия сессии
         /// </summary>
         public void CloseSession()
         {
-            DelClosesession(this._myName);
+            DelClosesession(_myName);
         }
         /// <summary>
         /// Интерфейс подтверждённости сессии (сессия была принята или на неё как-либо иначе отреагировали)
@@ -175,7 +206,7 @@ namespace MSIPClassLibrary
             string CodecInfo = "", tmp = "", tmp1 = "";
             CodecInfo += "Content-Type: application/sdp\n";
             tmp += "v=0\n";
-            tmp += "o=" + n.ToString() + "m" + "a" + _sessionID.ToString() + "IN IP4" + _myIp + "\n";
+            tmp += "o=" + _cSeq.ToString() + "m" + "a" + _sessionID.ToString() + "IN IP4" + _myIp + "\n";
             tmp += "c=IN IP4 " + _myIp + "\n";
 
             string[] ms = str.Split('\n');
@@ -201,7 +232,7 @@ namespace MSIPClassLibrary
             CodecInfo += "Content-Type: application/sdp\n";
 
             tmp += "v=0\n";
-            tmp += "o=" + _myName + n.ToString() + "m" + "a" + _sessionID.ToString() + "IN IP4" + _myIp + "\n";
+            tmp += "o=" + _myName + _cSeq.ToString() + "m" + "a" + _sessionID.ToString() + "IN IP4" + _myIp + "\n";
             tmp += "c=IN IP4 " + _myIp + "\n";
             tmp += "m=audio " + this._myaudioport.ToString() + " RTP/AVP 0\n";
             tmp += "a=rtpmap:0 PCMA/8000\n";
