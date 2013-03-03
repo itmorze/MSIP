@@ -86,7 +86,7 @@ namespace MSIPClassLibrary
         //Thread WaitForAnswer;       
        
 
-        public Session(int myPort,  string toUser, DelCloseSession d1, string ID, string SDPfunc, Parameters usParam)
+        public Session(int myPort,  string toUser, /*DelCloseSession d1,*/ string ID, string SDPfunc, Parameters usParam)
         {
             _toIP = usParam.Domain;
             _toUser = toUser;
@@ -96,7 +96,7 @@ namespace MSIPClassLibrary
             _cSeq = 0;
             _myaudioport = 11010;
             _sessionID = ID;
-            DelClosesession = d1;
+           // DelClosesession = d1;
             _cSeq++;
 
             if (SDPfunc.Length != 0)
@@ -204,40 +204,40 @@ namespace MSIPClassLibrary
         string SDPcombine(string str)
         {
             string CodecInfo = "", tmp = "", tmp1 = "";
-            CodecInfo += "Content-Type: application/sdp\n";
-            tmp += "v=0\n";
-            tmp += "o=" + _cSeq.ToString() + "m" + "a" + _sessionID.ToString() + "IN IP4" + _myIp + "\n";
-            tmp += "c=IN IP4 " + _myIp + "\n";
+            CodecInfo += "Content-Type: application/sdp \r\n";
+            tmp += "v=0 \r\n";
+            tmp += "o=" + _cSeq.ToString() + "m" + "a" + _sessionID.ToString() + "IN IP4 " + _myIp + "\r\n";
+            tmp += "c=IN IP4 " + _myIp + " \r\n";
 
             string[] ms = str.Split('\n');
             foreach (string str1 in ms)
             {
                 if (str1.Contains("m=audio"))
                 {
-                    tmp += str1 + "\n";
+                    tmp += str1 + "\r\n";
                     tmp1 = str1.Remove(0, str1.IndexOf("audio ") + "audio ".Length);
                     tmp1 = tmp1.Remove(tmp1.IndexOf(" RTP"));
                     this._toaudioport = Convert.ToInt32(tmp1);
                 }
-                if (str1.Contains("PCMA/8000")) tmp += str1 + "\n";
+                if (str1.Contains("PCMA/8000")) tmp += str1 + "r\n";
             }
 
-            CodecInfo += "Content-Length: " + tmp.Length + "\n\n" + tmp;
+            CodecInfo += "Content-Length: " + tmp.Length + "\r\n\n" + tmp;
             return CodecInfo;
         }
 
-        string SDP()
+        public string SDP()
         {
             string CodecInfo = "", tmp = "";
-            CodecInfo += "Content-Type: application/sdp\n";
+            CodecInfo += "Content-Type: application/sdp \r\n";
 
-            tmp += "v=0\n";
-            tmp += "o=" + _myName + _cSeq.ToString() + "m" + "a" + _sessionID.ToString() + "IN IP4" + _myIp + "\n";
-            tmp += "c=IN IP4 " + _myIp + "\n";
-            tmp += "m=audio " + this._myaudioport.ToString() + " RTP/AVP 0\n";
-            tmp += "a=rtpmap:0 PCMA/8000\n";
+            tmp += "v=0\r\n";
+            tmp += "o=" + _myName + _cSeq.ToString() + "m" + "a" + _sessionID.ToString() + "IN IP4" + _myIp + "\r\n";
+            tmp += "c=IN IP4 " + _myIp + "\r\n";
+            tmp += "m=audio " + this._myaudioport.ToString() + " RTP/AVP 0\r\n";
+            tmp += "a=rtpmap:0 PCMA/8000\r\n";
 
-            CodecInfo += "Content-Length: " + tmp.Length + "\n\n" + tmp;
+            CodecInfo += "Content-Length: " + tmp.Length + "\r\n\n" + tmp;
 
             return CodecInfo;
         }
