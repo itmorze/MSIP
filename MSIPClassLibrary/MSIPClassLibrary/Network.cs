@@ -64,14 +64,9 @@ namespace MSIPClassLibrary
                 }
 
                 
-                //Byte[] sendBytes = Encoding.ASCII.GetBytes(Info);
-                UTF8Encoding utf8 = new UTF8Encoding();
-                byte[] encodedBytes = utf8.GetBytes(message);
-                
-                
                 Encoding enc = Encoding.GetEncoding("us-ascii");
                 Byte[] sendBytes = enc.GetBytes(message);
-          //      string newstr = enc.GetString(sendBytes,0,sendBytes.Length);
+
                 
                 _writer.WriteBytes(sendBytes);
                 await _writer.StoreAsync();

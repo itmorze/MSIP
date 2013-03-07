@@ -81,7 +81,7 @@ namespace MSIPClassLibrary
         bool _sessionConfirmed = false;
         string _sessionID;
         string _SDP;
-       
+        private Parameters _usParam;
         
         //Thread WaitForAnswer;       
        
@@ -98,6 +98,7 @@ namespace MSIPClassLibrary
             _sessionID = ID;
            // DelClosesession = d1;
             _cSeq++;
+            _usParam = usParam;
 
             if (SDPfunc.Length != 0)
             {
@@ -147,6 +148,14 @@ namespace MSIPClassLibrary
         {
             get { return _sessionID; }
         }
+        public string Domain
+        {
+            get { return _usParam.Domain; }
+        }
+        public string ServerPort
+        {
+            get { return _usParam.ServerPort; }
+        }
         /// <summary>
         /// Функция закрытия сессии
         /// </summary>
@@ -157,7 +166,7 @@ namespace MSIPClassLibrary
         /// <summary>
         /// Интерфейс подтверждённости сессии (сессия была принята или на неё как-либо иначе отреагировали)
         /// </summary>
-        public bool _SessionConfirmed
+        public bool SessionConfirmed
         {
             get
             {
