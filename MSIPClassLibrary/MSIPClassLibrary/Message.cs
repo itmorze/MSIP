@@ -222,17 +222,15 @@ namespace MSIPClassLibrary
         public void Register()
         {
             string Request = "REGISTER "+currentSession.Domain+':'+currentSession.ServerPort+" SIP/2.0 \r\n";
-            Request +=
-                "Via: SIP/2.0/UDP "+ currentSession.MyIP+":5060;branch=z9hG4bK-"+"d8754z-0277bb13371c5a7d-1---d8754z-;rport \r\n";
+            Request +="Via: SIP/2.0/UDP "+ currentSession.MyIP+":5060;branch=z9hG4bK-"+"d8754z-0277bb13371c5a7d-1---d8754z-;rport \r\n";
             Request += "Max-Forwards: 70 \r\n";
-            Request += "Contact: <sip:itmorze@192.168.0.101:50580;rinstance=a6e82112b3232acc> \r\n";
+            Request += "Contact: <sip:"+currentSession.MyName+"@"+currentSession.MyIP+":5060;rinstance=a6e82112b3232acc> \r\n";
             Request += "To: \"itmorze\"<sip:"+currentSession.MyName+'@'+currentSession.Domain+":5060> \r\n";
             Request += "From: \"itmorze\"<sip:" + currentSession.MyName + '@' + currentSession.Domain + ":5060>;tag=fe67df49 \r\n";
             Request += "Call-ID: ODlmNzUwOTFmMjdhYzdiMjhlYjhmMTI4ZGQ5NDQyNzY. \r\n";
-            Request += "CSeq: 1 REGISTER \r\n";
+            Request += "CSeq: "+currentSession.CSeq+" REGISTER \r\n";
             Request += "Expires: 120 \r\n";
-            Request +=
-                "Allow: INVITE, ACK, CANCEL, OPTIONS, BYE, REGISTER, SUBSCRIBE, NOTIFY, REFER, INFO, MESSAGE \r\n";
+            Request +="Allow: INVITE, ACK, CANCEL, OPTIONS, BYE, REGISTER \r\n";
             Request += "Supportes: replaces \r\n";
             Request += "MSIPhone\r\n";
             Request += "Content-Length:0 \r\n\r\n";
