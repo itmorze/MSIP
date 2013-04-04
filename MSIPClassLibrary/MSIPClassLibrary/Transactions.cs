@@ -39,10 +39,15 @@ namespace MSIPClassLibrary
 
             stateTransaction = new StateTryingNoInvite(request, ipAdress);
             stateTransaction.Terminated += Terminated;
+            timerE+=()=>{ stateTransaction.ReceivedE();}
             timerE.Interval=new TimeSpan(0,0,0,0,countE);
             timerF.Interval = new TimeSpan(0, 0, 0, 64);
+            timerE.Start();
+            timerF.Start();
 
         }
+
+        
 
         private void Terminated(IStateClientNoInvite _state)
         {
