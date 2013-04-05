@@ -6,13 +6,16 @@ using System.Threading;
 using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
 using MSIPClassLibrary;
 using Windows.Networking;
+using Windows.UI.Xaml;
 
 namespace UnitTestMSIPLibrary
 {
     [TestClass]
     public class UnitTest1
     {
-        [TestMethod]
+        //DispatcherTimer timerE=new DispatcherTimer();
+        // DispatcherTimer   timerF = new DispatcherTimer();
+        
         public void TestMethod1()
         {
          //   Session mySession=new Session();
@@ -29,6 +32,25 @@ namespace UnitTestMSIPLibrary
            // Assert.AreEqual(true, myHost.IsConnected);
         }
 
+        [TestMethod]
+        public void TestMethod2()
+        {
+            Timer t=new Timer();
+            t.Tick += qq;
+            t.StartTimer(10000);
+
+            
+
+
+        //    TransactionClinetNoInvite newTrans=new TransactionClinetNoInvite(timerE,timerF);
+         //   newTrans.Start("blabla","192.168.0.1");
+
+        }
+
+        void qq(object s, EventArgs e)
+        {
+           TestMethod1();
+        }
        
     }
 }
