@@ -35,22 +35,12 @@ namespace UnitTestMSIPLibrary
         [TestMethod]
         public void TestMethod2()
         {
-            Timer t=new Timer();
-            t.Tick += qq;
-            t.StartTimer(10000);
-
             
-
-
-        //    TransactionClinetNoInvite newTrans=new TransactionClinetNoInvite(timerE,timerF);
-         //   newTrans.Start("blabla","192.168.0.1");
+          TransactionClinetNoInvite newTrans=new TransactionClinetNoInvite();
+           newTrans.Start("blabla","192.168.0.1");
 
         }
 
-        void qq(object s, EventArgs e)
-        {
-           TestMethod1();
-        }
        
     }
 }

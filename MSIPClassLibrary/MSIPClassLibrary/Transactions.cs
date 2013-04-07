@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Windows.Foundation;
+using Windows.System.Threading;
+using Windows.UI.Core;
 using Windows.UI.Xaml;
 
 
@@ -27,40 +30,40 @@ namespace MSIPClassLibrary
     public class TransactionClinetNoInvite
     {
         private IStateClientNoInvite stateTransaction;
-        private DispatcherTimer timerE;// = new DispatcherTimer();
-        private DispatcherTimer timerF;
+        private ThreadPoolTimer timerE;
+   
+        private ThreadPoolTimer timerF;
         private int countE, countF;
         private const int t1 = 500, t2=4; //t1, ms; t2, s 
        
-        public TransactionClinetNoInvite(DispatcherTimer e, DispatcherTimer f)
+        public TransactionClinetNoInvite()
         {
             countE = t1;
-            countF = 64*t1/1000;
-            timerE = e;
-            timerF = f;
+            countF = 64*t1;
+            
         }
 
         public void Start(string request, string ipAdress)
         {
-            timerE = new DispatcherTimer();
-            timerF = new DispatcherTimer();
-            //устанавливаем статус Trying
+             //устанавливаем статус Trying и подписываемся на событие обновления таймера E
             stateTransaction = new StateTryingNoInvite(request, ipAdress);
-            
+            stateTransaction.RefreshCountE += RefreshTimerE;
+
             //подписываемся на событие перехода в состояние Terminated
             stateTransaction.Terminated += Terminated;
 
-            // В случае истечения таймера в состоянии произойдет выполнение метода
-            timerE.Tick += (object sender, object e) => { if (stateTransaction != null) stateTransaction.ReceivedE(ref countE); };
-            stateTransaction.RefreshCountE += RefreshTimerE;
 
-            timerF.Tick += (object sender, object e) => { if (stateTransaction != null) stateTransaction.ReceivedF(ref countF); };
+            //Инициализируются таймеры E и F
+            timerE = ThreadPoolTimer.CreateTimer((source) => Windows.System.Threading.ThreadPool.RunAsync(
+                (operation) => { if (stateTransaction != null) stateTransaction.ReceivedE(ref countE); }), TimeSpan.FromMilliseconds(countE));
+            
+            timerF = ThreadPoolTimer.CreateTimer((source) => Windows.System.Threading.ThreadPool.RunAsync(
+                (operation) => { if (stateTransaction != null) stateTransaction.ReceivedF(ref countE); }), TimeSpan.FromMilliseconds(countF));
 
-            //задаем первоначальные параметры таймера и запускаем сам таймер
-            timerE.Interval=new TimeSpan(0,0,0,0,countE);
-            timerF.Interval = new TimeSpan(0, 0, 0, countF);
-            timerE.Start();
-            timerF.Start();
+            
+           
+
+
 
             
 
@@ -68,23 +71,16 @@ namespace MSIPClassLibrary
 
         internal void RefreshTimerE()
         {
-            //запускаем таймер с новым значением
-            if(timerE.IsEnabled)
-                timerE.Stop();
-
-            timerE.Interval=new TimeSpan(0,0,0,0,countE);
-            timerE.Start();
+            timerE = ThreadPoolTimer.CreateTimer((source) => Windows.System.Threading.ThreadPool.RunAsync(
+                (operation) => { if (stateTransaction != null) stateTransaction.ReceivedE(ref countE); }), TimeSpan.FromMilliseconds(countE));
 
         }
 
-        internal void RefreshTimerF()
-        {
-            //исходя из состояния обновляем таймер
-        }
 
         private void Terminated(IStateClientNoInvite _state)
         {
             //проинформировать TU, чтобы тот сбросил транзакцию
+            stateTransaction = _state;
         }
 
        
@@ -134,8 +130,8 @@ namespace MSIPClassLibrary
         public void ReceivedE(ref int countE)
         {
             //отослать запрос повторно
-            
-            
+
+
             
             //refresh countE
             if (2*countE < t2)
@@ -214,30 +210,4 @@ namespace MSIPClassLibrary
 
 
 
-
-
-
-
-    public class Timer
-    {
-        private bool isTimerRunning;
-        public event EventHandler Tick;
-
-        public async void StartTimer(int ms)
-        {
-            this.isTimerRunning = true;
-
-            while (this.isTimerRunning)
-            {
-                await Task.Delay(ms);
-            }
-            Tick(this, new EventArgs());
-        }
-
-        public void StopTimer()
-        {
-            this.isTimerRunning = false;
-        }
-
-    }
 }
