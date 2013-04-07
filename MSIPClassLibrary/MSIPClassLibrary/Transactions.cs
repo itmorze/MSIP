@@ -71,6 +71,14 @@ namespace MSIPClassLibrary
 
         internal void RefreshTimerE()
         {
+            
+
+            //тест
+            Parameters myParam = new Parameters(stateTransaction.GetType().ToString(), "itmorze", "test2.mangosip.ru", "5060", "Itqq2808690", "3600");
+            Session ses = new Session(5060, "test", "123456Ggg", "anySDP", myParam);
+            Message mes = new Message(ses);
+            mes.Register();
+            //тест
             timerE = ThreadPoolTimer.CreateTimer((source) => Windows.System.Threading.ThreadPool.RunAsync(
                 (operation) => { if (stateTransaction != null) stateTransaction.ReceivedE(ref countE); }), TimeSpan.FromMilliseconds(countE));
 
@@ -81,6 +89,15 @@ namespace MSIPClassLibrary
         {
             //проинформировать TU, чтобы тот сбросил транзакцию
             stateTransaction = _state;
+
+
+            //тест
+            Parameters myParam = new Parameters(stateTransaction.GetType().ToString(), "itmorze", "test2.mangosip.ru", "5060", "Itqq2808690", "3600");
+            Session ses = new Session(5060, "test", "123456Ggg", "anySDP", myParam);
+            Message mes = new Message(ses);
+            mes.Register();
+            //тест
+
         }
 
        
