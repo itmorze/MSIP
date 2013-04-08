@@ -54,9 +54,10 @@ namespace MSIPClassLibrary
                 }
             }
 
-            DataWriter _writer = null;
+            
             public async void SendMessage(string message)
             {
+                DataWriter _writer = null;
                 if (_writer == null)
                 {
                     var stream = _socket.OutputStream;
@@ -69,7 +70,8 @@ namespace MSIPClassLibrary
 
                 
                 _writer.WriteBytes(sendBytes);
-                await _writer.StoreAsync();
+                var writer=await _writer.StoreAsync();
+
             }
         }
 
