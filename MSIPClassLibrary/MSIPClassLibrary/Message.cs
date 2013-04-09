@@ -150,7 +150,7 @@ namespace MSIPClassLibrary
             if (SDPRequired)
                 Request += "\n" + currentSession.SDP();
 
-            SendInfo(Request);
+            SendInfo(Request,currentSession.ToIP,currentSession.ServerPort);
 
             if (EndSession)
                 this.CloseSession();
@@ -192,7 +192,7 @@ namespace MSIPClassLibrary
             {
                 Request += currentSession.SDPInfo;
             }
-            SendInfo(Request);
+            SendInfo(Request,currentSession.ToIP, currentSession.ServerPort);
 
             if (EndSession)
                 CloseSession();
@@ -213,39 +213,27 @@ namespace MSIPClassLibrary
 
             Request += currentSession.SDPInfo;
 
-            SendInfo(Request);
+            SendInfo(Request, currentSession.ToIP, currentSession.ServerPort);
 
           //  WaitForAnswer = new Thread(WaitForAnswerFunc);
            // WaitForAnswer.Start();
 
         }
-        public void Register()
+        public void Register(string branch)
         {
-            string Request = "REGISTER "+currentSession.Domain+':'+currentSession.ServerPort+" SIP/2.0 \r\n";
-            Request +="Via: SIP/2.0/UDP "+ currentSession.MyIP+":5060;branch=z9hG4bK-"+"d8754z-0277bb13371c5a7d-1---d8754z-;rport \r\n";
+            string Request = "REGISTER sip:"+currentSession.Domain+" SIP/2.0 \r\n";
+            Request +="Via: SIP/2.0/UDP "+ currentSession.Domain+":"+currentSession.MyPort+";branch=z9hG4bK-"+branch+";rport \r\n"; //проверить
             Request += "Max-Forwards: 70 \r\n";
-            Request += "Contact: <sip:"+currentSession.MyName+"@"+currentSession.MyIP+":5060;rinstance=a6e82112b3232acc> \r\n";
-            Request += "To: \"itmorze\"<sip:"+currentSession.MyName+'@'+currentSession.Domain+":5060> \r\n";
-            Request += "From: \"itmorze\"<sip:" + currentSession.MyName + '@' + currentSession.Domain + ":5060>;tag=fe67df49 \r\n";
-            Request += "Call-ID: ODlmNzUwOTFmMjdhYzdiMjhlYjhmMTI4ZGQ5NDQyNzY. \r\n";
+            Request += "Contact: <sip:"+currentSession.MyName+"@"+currentSession.Domain+"> \r\n";
+            Request += "To: \"itmorze\"<sip:"+currentSession.MyName+'@'+currentSession.Domain+"> \r\n";
+            Request += "From: \"itmorze\"<sip:" + currentSession.MyName + '@' + currentSession.Domain + ">;tag="+currentSession.Tag+"\r\n";
+            Request += "Call-ID: "+currentSession.SessionID+" \r\n";
             Request += "CSeq: "+currentSession.CSeq+" REGISTER \r\n";
-            Request += "Expires: 120 \r\n";
-            Request +="Allow: INVITE, ACK, CANCEL, OPTIONS, BYE, REGISTER \r\n";
-            Request += "Supportes: replaces \r\n";
-            Request += "MSIPhone\r\n";
-            Request += "Content-Length:0 \r\n\r\n";
+            Request += "Expires: "+currentSession._usParam.Expires+" \r\n";
+            Request += "MSIPhoneBeta\r\n";
+            Request += "Content-Length: 0 \r\n\r\n";
            // SendInfo(Request);
-            NetworkInterface myPacket = new NetworkInterface();
-            HostName host = new HostName("81.88.80.235");
-            var tsk=myPacket.Connect(host,"5060");
-            tsk.Wait();
-
-            if(myPacket.IsConnected)
-                myPacket.SendMessage(Request);
-            else
-            {
-                throw ArgumentNullException;
-            }
+            SendInfo(Request,currentSession.ToIP,currentSession.ServerPort);
             //var task=
                 
             //task.Wait();
@@ -266,7 +254,7 @@ namespace MSIPClassLibrary
         /// </summary>
         /// <param name="Info">Отправляемая строка</param>
         /// <returns>Если true - отправка информации прошла успешно, иначе - false.</returns>
-        bool SendInfo(string Info)
+        void SendInfo(string Info, string ipAdress, string ipPort)
         {
            // string ipAddress = currentSession.CurrentIPAddress();
 
@@ -274,15 +262,19 @@ namespace MSIPClassLibrary
             {
                
                 NetworkInterface myPacket = new NetworkInterface();
-                HostName host = new HostName("81.88.80.235");
-                myPacket.Connect(host, "5060");
-                //var task=
+                HostName host = new HostName(ipAdress);
+                var tsk=myPacket.Connect(host, ipPort);
+                tsk.Wait();
+                if (myPacket.IsConnected)
+                {
                     myPacket.SendMessage(Info);
-                //task.Wait();
+                }
+
+
             }
             catch (Exception e)
             {
-                return false;
+                
             }
             
             //UdpClient udpClient = new UdpClient();
@@ -322,7 +314,7 @@ namespace MSIPClassLibrary
             //    if (ips.Length == 0) return false;
             //};
 
-            return true;
+           
         }
     }
 }

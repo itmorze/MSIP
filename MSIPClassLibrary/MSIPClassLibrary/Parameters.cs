@@ -80,8 +80,9 @@ namespace MSIPClassLibrary
         int _port, _myaudioport, _toaudioport;
         bool _sessionConfirmed = false;
         string _sessionID;
+        private string _tag;
         string _SDP;
-        private Parameters _usParam;
+        internal Parameters _usParam;
         
         //Thread WaitForAnswer;       
        
@@ -96,9 +97,13 @@ namespace MSIPClassLibrary
             _cSeq = 0;
             _myaudioport = 11010;
             _sessionID = ID;
+            
            // DelClosesession = d1;
             _cSeq++;
             _usParam = usParam;
+            _sessionID = RandomForCALLID(8) + '-' + RandomForCALLID(6) + '-' + RandomForCALLID(3) + '-' +
+                         RandomForCALLID(5) + '@' + _myIp;
+            _tag = RandomForCALLID(9);
 
             if (SDPfunc.Length != 0)
             {
@@ -148,6 +153,10 @@ namespace MSIPClassLibrary
         {
             get { return _sessionID; }
         }
+        public string Tag
+        {
+            get { return _tag; }
+        }
         public string Domain
         {
             get { return _usParam.Domain; }
@@ -155,6 +164,10 @@ namespace MSIPClassLibrary
         public string ServerPort
         {
             get { return _usParam.ServerPort; }
+        }
+        public string MyPort
+        {
+            get { return _port.ToString(); }
         }
         /// <summary>
         /// Функция закрытия сессии
@@ -249,6 +262,20 @@ namespace MSIPClassLibrary
             CodecInfo += "Content-Length: " + tmp.Length + "\r\n\n" + tmp;
 
             return CodecInfo;
+        }
+
+        private string RandomForCALLID(int size)
+        {
+            Random random = new Random((int)DateTime.Now.Ticks);
+            StringBuilder builder = new StringBuilder();
+            char ch;
+            for (int i = 0; i < size; i++)
+            {
+                ch = Convert.ToChar(Convert.ToInt32(Math.Floor(26 * random.NextDouble() + 65)));
+                builder.Append(ch);
+            }
+
+            return builder.ToString();
         }
     }
 

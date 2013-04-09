@@ -15,8 +15,8 @@ namespace UnitTestMSIPLibrary
     {
         //DispatcherTimer timerE=new DispatcherTimer();
         // DispatcherTimer   timerF = new DispatcherTimer();
-        
-        public void TestMethod1()
+        [TestMethod]
+        public void TestMethodSendInfo()
         {
          //   Session mySession=new Session();
             //Assert.AreEqual("46.249.24.190",mySession.CurrentIPAddress());
@@ -32,7 +32,7 @@ namespace UnitTestMSIPLibrary
            // Assert.AreEqual(true, myHost.IsConnected);
         }
 
-        [TestMethod]
+        
         public void TestMethod2()
         {
             

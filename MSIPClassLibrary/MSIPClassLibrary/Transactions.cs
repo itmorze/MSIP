@@ -77,9 +77,8 @@ namespace MSIPClassLibrary
             Parameters myParam = new Parameters(stateTransaction.GetType().ToString(), "itmorze", "test2.mangosip.ru", "5060", "Itqq2808690", "3600");
             Session ses = new Session(5060, "test", "123456Ggg", "anySDP", myParam);
             Message mes = new Message(ses);
-            mes.Register();
+            mes.Register("blabla12G");
             //тест
-            timerE = null;
             timerE = ThreadPoolTimer.CreateTimer((source) => Windows.System.Threading.ThreadPool.RunAsync(
                 (operation) => { if (stateTransaction != null) stateTransaction.ReceivedE(ref countE); }), TimeSpan.FromMilliseconds(countE));
             
@@ -137,13 +136,16 @@ namespace MSIPClassLibrary
     class StateTryingNoInvite:IStateClientNoInvite
     {
         const int t2=4000;
+        private string _request;
+        private string _ipAddress;
         public event StateNoInviteClientHandler NextState;
         public event StateNoInviteClientHandler Terminated;
         public event VoidEventHandler RefreshCountE;
 
-        public StateTryingNoInvite(string request, string ipAdress)
+        public StateTryingNoInvite(string request, string ipAddress)
         {
-            
+            _request = request;
+            _ipAddress = ipAddress;
         }
         
         public void ReceivedE(ref int countE)
@@ -161,6 +163,7 @@ namespace MSIPClassLibrary
             }
             RefreshCountE();
         }
+
         public void ReceivedF(ref int countF)
         {
             
@@ -168,6 +171,10 @@ namespace MSIPClassLibrary
             Terminated(new StateTerminatedNoInvite());
         }
 
+        public async void SendRequest()
+        {
+            
+        }
        
     
     }
