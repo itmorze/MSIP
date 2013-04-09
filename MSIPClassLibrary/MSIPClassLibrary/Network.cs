@@ -25,9 +25,10 @@ namespace MSIPClassLibrary
                 
             }
 
-            public async void Connect(HostName remoteHostName, string remoteServiceNameOrPort)
+            public async Task Connect(HostName remoteHostName, string remoteServiceNameOrPort)
             {
-                await _socket.ConnectAsync(remoteHostName, remoteServiceNameOrPort);
+                if(IsConnected!=true)
+                    await _socket.ConnectAsync(remoteHostName, remoteServiceNameOrPort);
 
                 IsConnected = true;
             }
@@ -60,8 +61,9 @@ namespace MSIPClassLibrary
                 DataWriter _writer = null;
                 if (_writer == null)
                 {
-                    var stream = _socket.OutputStream;
-                    _writer = new DataWriter(stream);
+                    
+                 //   var stream = _socket.OutputStream;
+                    _writer = new DataWriter(_socket.OutputStream);
                 }
 
                 
@@ -70,7 +72,12 @@ namespace MSIPClassLibrary
 
                 
                 _writer.WriteBytes(sendBytes);
-                var writer=await _writer.StoreAsync();
+                //var writer=
+             //   if(!IsConnected)
+             //       this.Connect(new HostName("81.88.80.235"), "5060");
+
+                await _writer.StoreAsync();
+                
 
             }
         }

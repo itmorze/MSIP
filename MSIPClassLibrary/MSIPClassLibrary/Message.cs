@@ -234,7 +234,21 @@ namespace MSIPClassLibrary
             Request += "Supportes: replaces \r\n";
             Request += "MSIPhone\r\n";
             Request += "Content-Length:0 \r\n\r\n";
-            SendInfo(Request);
+           // SendInfo(Request);
+            NetworkInterface myPacket = new NetworkInterface();
+            HostName host = new HostName("81.88.80.235");
+            var tsk=myPacket.Connect(host,"5060");
+            tsk.Wait();
+
+            if(myPacket.IsConnected)
+                myPacket.SendMessage(Request);
+            else
+            {
+                throw ArgumentNullException;
+            }
+            //var task=
+                
+            //task.Wait();
 
 
         }
@@ -262,7 +276,9 @@ namespace MSIPClassLibrary
                 NetworkInterface myPacket = new NetworkInterface();
                 HostName host = new HostName("81.88.80.235");
                 myPacket.Connect(host, "5060");
-                myPacket.SendMessage(Info);
+                //var task=
+                    myPacket.SendMessage(Info);
+                //task.Wait();
             }
             catch (Exception e)
             {
