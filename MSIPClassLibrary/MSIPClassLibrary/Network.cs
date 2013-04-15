@@ -10,7 +10,7 @@ using Windows.Storage.Streams;
 namespace MSIPClassLibrary
 {
     
-        public class NetworkInterface
+        public class NetworkInterface:IDisposable
         {
             private DatagramSocket _socket;
 
@@ -27,10 +27,13 @@ namespace MSIPClassLibrary
 
             public async Task Connect(HostName remoteHostName, string remoteServiceNameOrPort)
             {
+               
                 if(IsConnected!=true)
-                    await _socket.ConnectAsync(remoteHostName, remoteServiceNameOrPort);
+                  await _socket.ConnectAsync(remoteHostName,remoteServiceNameOrPort);
 
                 IsConnected = true;
+                
+
             }
 
 
@@ -58,6 +61,8 @@ namespace MSIPClassLibrary
             
             public async void SendMessage(string message)
             {
+               
+
                 DataWriter _writer = null;
                 if (_writer == null)
                 {
@@ -79,6 +84,11 @@ namespace MSIPClassLibrary
                 await _writer.StoreAsync();
                 
 
+            }
+
+            public void Dispose()
+            {
+                _socket.Dispose();
             }
         }
 

@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.Networking;
+using Windows.Networking.Sockets;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -36,10 +38,17 @@ namespace TestWithInterface
         {
         }
 
-        private void Button_Click_1(object sender, RoutedEventArgs e)
+        private async void Button_Click_1(object sender, RoutedEventArgs e)
         {
-            TransactionClinetNoInvite trans=new TransactionClinetNoInvite();
-            trans.Start("blala","192.168.0.1");
+            Parameters myParam = new Parameters("itmorze", "itmorze", "test2.mangosip.ru", "5060", "Itqq2808690", "3600");
+            Session registerSes = new Session("itmorze", "", myParam);
+            Message registerMes = new Message(registerSes);
+            TransactionClinetNoInvite newTrans = new TransactionClinetNoInvite();
+            string register = registerMes.Register(newTrans.Branch);
+          
+            newTrans.Start(register, "test2.mangosip.ru", "5060");
+
+
         }
     }
 }

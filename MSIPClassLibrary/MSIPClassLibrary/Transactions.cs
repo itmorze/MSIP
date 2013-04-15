@@ -4,6 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.Foundation;
+using Windows.Networking;
+using Windows.Networking.Sockets;
+using Windows.Storage.Streams;
 using Windows.System.Threading;
 using Windows.UI.Core;
 using Windows.UI.Xaml;
@@ -16,8 +19,56 @@ namespace MSIPClassLibrary
 
     public delegate void VoidEventHandler();
 
-    class Transactions
+    public class Transactions
     {
+        protected string RandomBranch(int size)
+        {
+            Random random = new Random((int)DateTime.Now.Ticks);
+            StringBuilder builder = new StringBuilder();
+            builder.Append("z9hG4bK-");
+            char ch;
+            for (int i = 0; i < size; i++)
+            {
+                ch = Convert.ToChar(Convert.ToInt32(Math.Floor(26 * random.NextDouble() + 65)));
+                builder.Append(ch);
+            }
+
+            return builder.ToString();
+        }
+
+        protected async Task SendInfo(string Info, string ipAdress, string ipPort)
+        {
+            // string ipAddress = currentSession.CurrentIPAddress();
+
+            try
+            {
+             
+                DatagramSocket udpSocket=new DatagramSocket();
+                await udpSocket.BindServiceNameAsync("5060");
+
+              //  NetworkInterface myPacket = new NetworkInterface();
+                HostName host = new HostName(ipAdress);
+                    await udpSocket.ConnectAsync(host,ipPort);
+
+
+                DataWriter udpWriter=new DataWriter(udpSocket.OutputStream);
+                udpWriter.WriteString(Info);
+                await udpWriter.StoreAsync();
+                //var tsk = myPacket.Connect(host, ipPort);
+                //tsk.Wait();
+
+                //if (myPacket.IsConnected)
+                //{
+                //    myPacket.SendMessage(Inf);
+                //}
+                udpSocket.Dispose();
+
+            }
+            catch (Exception e)
+            {
+
+            }
+        }
     }
 
 
@@ -27,62 +78,63 @@ namespace MSIPClassLibrary
     }
 
 
-    public class TransactionClinetNoInvite
+    public class TransactionClinetNoInvite:Transactions
     {
         private IStateClientNoInvite stateTransaction;
         private ThreadPoolTimer timerE;
-   
+
+        private string _branch;
         private ThreadPoolTimer timerF;
         private int countE, countF;
         private const int t1 = 500, t2=4; //t1, ms; t2, s 
+
+        private string _request, _ipAdress, _port;
        
         public TransactionClinetNoInvite()
         {
             countE = t1;
             countF = 64*t1;
-            
+            _branch = RandomBranch(15);
         }
 
-        public void Start(string request, string ipAdress)
+        public string Branch 
         {
+            get { return _branch; }
+        }
+
+        public void Start(string request, string toIp,string serverPort)//string ipAdress,string port)
+        {
+            _request = request;
+            _ipAdress = toIp;
+            _port = serverPort;
              //устанавливаем статус Trying и подписываемся на событие обновления таймера E
-            stateTransaction = new StateTryingNoInvite(request, ipAdress);
+            stateTransaction = new StateTryingNoInvite(request, toIp);
             stateTransaction.RefreshCountE += RefreshTimerE;
 
             //подписываемся на событие перехода в состояние Terminated
             stateTransaction.Terminated += Terminated;
 
-
+            var tskSend=SendInfo(_request, _ipAdress, _port);
+            tskSend.Wait();
             //Инициализируются таймеры E и F
-            timerE = ThreadPoolTimer.CreateTimer((source) => Windows.System.Threading.ThreadPool.RunAsync(
+            timerE = ThreadPoolTimer.CreateTimer( (source) =>  Windows.System.Threading.ThreadPool.RunAsync(
                 (operation) => { if (stateTransaction != null) stateTransaction.ReceivedE(ref countE); }), TimeSpan.FromMilliseconds(countE));
             
-            timerF = ThreadPoolTimer.CreateTimer((source) => Windows.System.Threading.ThreadPool.RunAsync(
+            timerF = ThreadPoolTimer.CreateTimer( (source) =>  Windows.System.Threading.ThreadPool.RunAsync(
                 (operation) => { if (stateTransaction != null) stateTransaction.ReceivedF(ref countE); }), TimeSpan.FromMilliseconds(countF));
 
             
-           
-
-
-
-            
-
         }
 
         internal void RefreshTimerE()
         {
-            
+      
+            var tskSend=SendInfo(_request, _ipAdress, _port);
+            tskSend.Wait();
 
-            //тест
-            Parameters myParam = new Parameters(stateTransaction.GetType().ToString(), "itmorze", "test2.mangosip.ru", "5060", "Itqq2808690", "3600");
-            Session ses = new Session(5060, "test", "123456Ggg", "anySDP", myParam);
-            Message mes = new Message(ses);
-            mes.Register("blabla12G");
-            //тест
-            timerE = ThreadPoolTimer.CreateTimer((source) => Windows.System.Threading.ThreadPool.RunAsync(
+            timerE = ThreadPoolTimer.CreateTimer((source) =>  Windows.System.Threading.ThreadPool.RunAsync(
                 (operation) => { if (stateTransaction != null) stateTransaction.ReceivedE(ref countE); }), TimeSpan.FromMilliseconds(countE));
-            
-
+        
         }
 
 

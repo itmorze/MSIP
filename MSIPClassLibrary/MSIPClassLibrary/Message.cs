@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.Networking;
-using System.Text;
+
 
 namespace MSIPClassLibrary
 {
@@ -219,10 +219,10 @@ namespace MSIPClassLibrary
            // WaitForAnswer.Start();
 
         }
-        public void Register(string branch)
+        public string Register(string branch)
         {
             string Request = "REGISTER sip:"+currentSession.Domain+" SIP/2.0 \r\n";
-            Request +="Via: SIP/2.0/UDP "+ currentSession.Domain+":"+currentSession.MyPort+";branch=z9hG4bK-"+branch+";rport \r\n"; //проверить
+            Request +="Via: SIP/2.0/UDP "+ currentSession.Domain+":"+currentSession.PortRegister+";branch=z9hG4bK-"+branch+";rport \r\n"; //проверить
             Request += "Max-Forwards: 70 \r\n";
             Request += "Contact: <sip:"+currentSession.MyName+"@"+currentSession.Domain+"> \r\n";
             Request += "To: \"itmorze\"<sip:"+currentSession.MyName+'@'+currentSession.Domain+"> \r\n";
@@ -232,11 +232,11 @@ namespace MSIPClassLibrary
             Request += "Expires: "+currentSession._usParam.Expires+" \r\n";
             Request += "MSIPhoneBeta\r\n";
             Request += "Content-Length: 0 \r\n\r\n";
-           // SendInfo(Request);
-            SendInfo(Request,currentSession.ToIP,currentSession.ServerPort);
-            //var task=
-                
-            //task.Wait();
+        
+            //SendInfo(Request,currentSession.ToIP,currentSession.ServerPort);
+            
+                return Request;
+        
 
 
         }

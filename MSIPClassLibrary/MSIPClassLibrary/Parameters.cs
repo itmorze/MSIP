@@ -11,7 +11,7 @@ namespace MSIPClassLibrary
     public delegate void DelCloseSession(string Name);
     public class Parameters
     {
-       
+       //Объекты данного класса содержат настройки аккаунта
        
 
         private string _displayName;
@@ -71,39 +71,37 @@ namespace MSIPClassLibrary
     
     public class Session
     {
-        DelCloseSession DelClosesession;
+        //Объект данного класса описывает параметры сессии соединения с сервером
+        //А также объекты описывают сессию каждого вызова
         string _toIP;
         string _toUser;
         string _myName;
         string _myIp;
-        int _cSeq = 0;       //
-        int _port, _myaudioport, _toaudioport;
-        bool _sessionConfirmed = false;
+        int _cSeq;
+        private string _portRegister;
+        private string _myaudioport;
+        string _toaudioport;
         string _sessionID;
         private string _tag;
         string _SDP;
         internal Parameters _usParam;
         
-        //Thread WaitForAnswer;       
-       
 
-        public Session(int myPort,  string toUser, /*DelCloseSession d1,*/ string ID, string SDPfunc, Parameters usParam)
+        public Session(string toUser, string SDPfunc, Parameters usParam)
         {
+            _myaudioport = "110110";
+            _portRegister = usParam.ServerPort;
+
             _toIP = usParam.Domain;
             _toUser = toUser;
             _myName = usParam.UserId;
             _myIp = CurrentIPAddress();
-            _port = myPort;
             _cSeq = 0;
-            _myaudioport = 11010;
-            _sessionID = ID;
-            
-           // DelClosesession = d1;
             _cSeq++;
             _usParam = usParam;
-            _sessionID = RandomForCALLID(8) + '-' + RandomForCALLID(6) + '-' + RandomForCALLID(3) + '-' +
-                         RandomForCALLID(5) + '@' + _myIp;
-            _tag = RandomForCALLID(9);
+            _sessionID = RandomForCallid(8) + '-' + RandomForCallid(6) + '-' + RandomForCallid(3) + '-' +
+                         RandomForCallid(5) + '@' + _myIp;
+            _tag = RandomForCallid(9);
 
             if (SDPfunc.Length != 0)
             {
@@ -114,6 +112,7 @@ namespace MSIPClassLibrary
                 _SDP = SDP();
             }
         }
+
 
         public string _ToUser
         {
@@ -165,31 +164,17 @@ namespace MSIPClassLibrary
         {
             get { return _usParam.ServerPort; }
         }
-        public string MyPort
+        public string PortRegister
         {
-            get { return _port.ToString(); }
+            set { _portRegister = value; }
+            get { return _portRegister.ToString(); }
         }
-        /// <summary>
-        /// Функция закрытия сессии
-        /// </summary>
-        public void CloseSession()
+        public string PortAudio
         {
-            DelClosesession(_myName);
+            set { _myaudioport = value; }
+            get { return _myaudioport; }
         }
-        /// <summary>
-        /// Интерфейс подтверждённости сессии (сессия была принята или на неё как-либо иначе отреагировали)
-        /// </summary>
-        public bool SessionConfirmed
-        {
-            get
-            {
-                return _sessionConfirmed;
-            }
-        }
-        /// <summary>
-        /// Интерфейс получения ID сессии
-        /// </summary>
-        public string _SessionID
+        public string SessionId
         {
             get
             {
@@ -198,8 +183,7 @@ namespace MSIPClassLibrary
         }
 
 
-
-        public string CurrentIPAddress()
+        private string CurrentIPAddress()
         {
             var icp = NetworkInformation.GetInternetConnectionProfile();
 
@@ -223,7 +207,12 @@ namespace MSIPClassLibrary
             return string.Empty;
         }
 
-        string SDPcombine(string str)
+        /// <summary>
+        /// Перекомбинация SDP
+        /// </summary>
+        /// <param name="str">полученный от Абонента Б SDP</param>
+        /// <returns>Перекомбинированный SDP</returns>
+        private string SDPcombine(string str)
         {
             string CodecInfo = "", tmp = "", tmp1 = "";
             CodecInfo += "Content-Type: application/sdp \r\n";
@@ -239,7 +228,7 @@ namespace MSIPClassLibrary
                     tmp += str1 + "\r\n";
                     tmp1 = str1.Remove(0, str1.IndexOf("audio ") + "audio ".Length);
                     tmp1 = tmp1.Remove(tmp1.IndexOf(" RTP"));
-                    this._toaudioport = Convert.ToInt32(tmp1);
+                    this._toaudioport = tmp1;
                 }
                 if (str1.Contains("PCMA/8000")) tmp += str1 + "r\n";
             }
@@ -248,7 +237,8 @@ namespace MSIPClassLibrary
             return CodecInfo;
         }
 
-        public string SDP()
+
+        internal string SDP()
         {
             string CodecInfo = "", tmp = "";
             CodecInfo += "Content-Type: application/sdp \r\n";
@@ -264,10 +254,10 @@ namespace MSIPClassLibrary
             return CodecInfo;
         }
 
-        private string RandomForCALLID(int size)
+        private static string RandomForCallid(int size)
         {
-            Random random = new Random((int)DateTime.Now.Ticks);
-            StringBuilder builder = new StringBuilder();
+            var random = new Random((int)DateTime.Now.Ticks);
+            var builder = new StringBuilder();
             char ch;
             for (int i = 0; i < size; i++)
             {
