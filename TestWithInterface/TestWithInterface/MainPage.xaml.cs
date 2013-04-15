@@ -46,7 +46,7 @@ namespace TestWithInterface
             TransactionClinetNoInvite newTrans = new TransactionClinetNoInvite();
             string register = registerMes.Register(newTrans.Branch);
           
-            newTrans.Start(register, "test2.mangosip.ru", "5060");
+            newTrans.Start(register, "test2.mangosip.ru", "5060","5060");
 
 
         }

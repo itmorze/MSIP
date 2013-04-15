@@ -36,7 +36,7 @@ namespace MSIPClassLibrary
             return builder.ToString();
         }
 
-        protected async Task SendInfo(string Info, string ipAdress, string ipPort)
+        protected async Task SendInfo(string info, string ipAdress, string ipPort, string myIpPort)
         {
             // string ipAddress = currentSession.CurrentIPAddress();
 
@@ -44,23 +44,22 @@ namespace MSIPClassLibrary
             {
              
                 DatagramSocket udpSocket=new DatagramSocket();
-                await udpSocket.BindServiceNameAsync("5060");
+            //    udpSocket.MessageReceived += MessageReceived;
+                await udpSocket.BindServiceNameAsync(myIpPort);
 
               //  NetworkInterface myPacket = new NetworkInterface();
+                
                 HostName host = new HostName(ipAdress);
-                    await udpSocket.ConnectAsync(host,ipPort);
-
+                
+                //await udpSocket.GetOutputStreamAsync(host, ipPort);
+                
+                IAsyncAction connectAction=udpSocket.ConnectAsync(host, ipPort);
+                connectAction.AsTask().Wait();
 
                 DataWriter udpWriter=new DataWriter(udpSocket.OutputStream);
-                udpWriter.WriteString(Info);
+                udpWriter.WriteString(info);
                 await udpWriter.StoreAsync();
-                //var tsk = myPacket.Connect(host, ipPort);
-                //tsk.Wait();
 
-                //if (myPacket.IsConnected)
-                //{
-                //    myPacket.SendMessage(Inf);
-                //}
                 udpSocket.Dispose();
 
             }
@@ -69,6 +68,11 @@ namespace MSIPClassLibrary
 
             }
         }
+        void MessageReceived(DatagramSocket socket, DatagramSocketMessageReceivedEventArgs eventArgs)
+        {
+            
+        }
+
     }
 
 
@@ -89,7 +93,8 @@ namespace MSIPClassLibrary
         private const int t1 = 500, t2=4; //t1, ms; t2, s 
 
         private string _request, _ipAdress, _port;
-       
+        private string _myPort;
+
         public TransactionClinetNoInvite()
         {
             countE = t1;
@@ -102,19 +107,20 @@ namespace MSIPClassLibrary
             get { return _branch; }
         }
 
-        public void Start(string request, string toIp,string serverPort)//string ipAdress,string port)
+        public void Start(string request, string toIp,string serverPort,string myPort)//string ipAdress,string port)
         {
             _request = request;
             _ipAdress = toIp;
             _port = serverPort;
+            _myPort = myPort;
              //устанавливаем статус Trying и подписываемся на событие обновления таймера E
             stateTransaction = new StateTryingNoInvite(request, toIp);
             stateTransaction.RefreshCountE += RefreshTimerE;
 
             //подписываемся на событие перехода в состояние Terminated
             stateTransaction.Terminated += Terminated;
-
-            var tskSend=SendInfo(_request, _ipAdress, _port);
+            
+            var tskSend=SendInfo(_request, _ipAdress, _port, _myPort);
             tskSend.Wait();
             //Инициализируются таймеры E и F
             timerE = ThreadPoolTimer.CreateTimer( (source) =>  Windows.System.Threading.ThreadPool.RunAsync(
@@ -129,7 +135,7 @@ namespace MSIPClassLibrary
         internal void RefreshTimerE()
         {
       
-            var tskSend=SendInfo(_request, _ipAdress, _port);
+            var tskSend=SendInfo(_request, _ipAdress, _port,_myPort);
             tskSend.Wait();
 
             timerE = ThreadPoolTimer.CreateTimer((source) =>  Windows.System.Threading.ThreadPool.RunAsync(
