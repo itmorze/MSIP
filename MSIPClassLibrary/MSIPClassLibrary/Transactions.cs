@@ -19,8 +19,12 @@ namespace MSIPClassLibrary
 
     public delegate void VoidEventHandler();
 
+    public delegate void MessageEventHandler(string mes);
+
     public class Transactions
     {
+        protected string _branch;
+        protected event MessageEventHandler receivedMessageEvent;
         protected string RandomBranch(int size)
         {
             Random random = new Random((int)DateTime.Now.Ticks);
@@ -44,7 +48,7 @@ namespace MSIPClassLibrary
             {
              
                 DatagramSocket udpSocket=new DatagramSocket();
-            //    udpSocket.MessageReceived += MessageReceived;
+                udpSocket.MessageReceived += MessageReceived;
                 await udpSocket.BindServiceNameAsync(myIpPort);
 
               //  NetworkInterface myPacket = new NetworkInterface();
@@ -70,7 +74,21 @@ namespace MSIPClassLibrary
         }
         void MessageReceived(DatagramSocket socket, DatagramSocketMessageReceivedEventArgs eventArgs)
         {
-            
+            try
+            {
+                 uint stringLenght = eventArgs.GetDataReader().UnconsumedBufferLength;
+                string response=eventArgs.GetDataReader().ReadString(stringLenght);
+                receivedMessageEvent(response);
+
+            }
+            catch (Exception exception)
+            {
+
+                throw;
+            }
+           
+
+           
         }
 
     }
@@ -87,7 +105,7 @@ namespace MSIPClassLibrary
         private IStateClientNoInvite stateTransaction;
         private ThreadPoolTimer timerE;
 
-        private string _branch;
+       // private string _branch;
         private ThreadPoolTimer timerF;
         private int countE, countF;
         private const int t1 = 500, t2=4; //t1, ms; t2, s 
@@ -119,9 +137,12 @@ namespace MSIPClassLibrary
 
             //подписываемся на событие перехода в состояние Terminated
             stateTransaction.Terminated += Terminated;
-            
+             receivedMessageEvent += stateTransaction.ReceivedMessage;
+
             var tskSend=SendInfo(_request, _ipAdress, _port, _myPort);
             tskSend.Wait();
+
+           
             //Инициализируются таймеры E и F
             timerE = ThreadPoolTimer.CreateTimer( (source) =>  Windows.System.Threading.ThreadPool.RunAsync(
                 (operation) => { if (stateTransaction != null) stateTransaction.ReceivedE(ref countE); }), TimeSpan.FromMilliseconds(countE));
@@ -150,13 +171,6 @@ namespace MSIPClassLibrary
             stateTransaction = _state;
 
 
-            //тест
-            //Parameters myParam = new Parameters(stateTransaction.GetType().ToString(), "itmorze", "test2.mangosip.ru", "5060", "Itqq2808690", "3600");
-            //Session ses = new Session(5060, "test", "123456Ggg", "anySDP", myParam);
-            //Message mes = new Message(ses);
-            //mes.Register();
-            //тест
-
         }
 
        
@@ -170,6 +184,8 @@ namespace MSIPClassLibrary
     //    event StateNoInviteClientHandler ChangeToTerminated();
         void ReceivedE(ref int countE);
         void ReceivedF(ref int countF);
+        void ReceivedMessage(string mes);
+
 
     }
 
@@ -187,6 +203,10 @@ namespace MSIPClassLibrary
         public void ReceivedF(ref int countF)
         {
             // хз, нужен ли это состояние вообще
+        }
+        public void ReceivedMessage(string mes)
+        {
+
         }
     
     }
@@ -229,31 +249,35 @@ namespace MSIPClassLibrary
             Terminated(new StateTerminatedNoInvite());
         }
 
-        public async void SendRequest()
+        public void ReceivedMessage(string mes)
         {
-            
+            string olol = mes;
         }
-       
     
     }
 
     class StateProceedingNoInvite:IStateClientNoInvite
     {
+        const int t2 = 4000;
+
         public event StateNoInviteClientHandler NextState;
         public event StateNoInviteClientHandler Terminated;
         public event VoidEventHandler RefreshCountE;
 
         public void ReceivedE(ref int countE)
         {
-            //отослать запрос повторно
-
+            countE = t2;
         }
         public void ReceivedF(ref int countF)
         {
             //проинформировать TU
             Terminated(new StateTerminatedNoInvite());
         }
-    
+
+        public void ReceivedMessage(string mes)
+        {
+
+        }
     }
 
     class StateCompleetedNoInvite:IStateClientNoInvite
@@ -272,6 +296,10 @@ namespace MSIPClassLibrary
             //ничего не предпринимать
 
         }
+        public void ReceivedMessage(string mes)
+        {
+
+        }
     }
 
     public class StateTerminatedNoInvite:IStateClientNoInvite
@@ -288,6 +316,10 @@ namespace MSIPClassLibrary
         public void ReceivedE(ref int countE)
         {
             //ничего не предпринимать
+
+        }
+        public void ReceivedMessage(string mes)
+        {
 
         }
     }
